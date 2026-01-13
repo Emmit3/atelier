@@ -1,0 +1,57 @@
+# Data directory - contains large datasets with thousands of images
+data/
+
+# Artifacts
+artifacts/
+
+# Image files (often large and numerous)
+*.png
+*.jpg
+*.jpeg
+
+# Model files (can be very large)
+*.pt
+*.pth
+*.ckpt
+*.h5
+*.pkl
+*.pkl.gz
+
+# Mesh files
+*.ply
+*.obj
+*.stl
+
+# Compressed archives
+*.z01
+*.z02
+*.z03
+*.zip
+*.tar.gz
+*.rar
+
+# Large point cloud/data files
+*.pcd
+
+# Results and outputs
+**/results/
+**/outputs/
+**/exps/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.venv
+env/
+venv/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

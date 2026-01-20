@@ -333,6 +333,8 @@ def merge_obj2_into_obj1(obj1, obj2, downsample_voxel_size, dbscan_remove_noise,
 
     # Merge and normalize 'clip_ft'
     obj1['clip_ft'] = (obj1['clip_ft'] * n_obj1_det + obj2['clip_ft'] * n_obj2_det) / (n_obj1_det + n_obj2_det)
+    # Convert to FP32 before normalize (FP16 not fully supported on CPU)
+    obj1['clip_ft'] = to_tensor(obj1['clip_ft']).float()
     obj1['clip_ft'] = F.normalize(obj1['clip_ft'], dim=0)
 
     # merge text_ft
@@ -604,8 +606,8 @@ def merge_overlap_objects(
     for i, j, ratio in zip(x, y, overlap_ratio):
         if ratio > merge_overlap_thresh:
             visual_sim = F.cosine_similarity(
-                to_tensor(objects[i]["clip_ft"]),
-                to_tensor(objects[j]["clip_ft"]),
+                to_tensor(objects[i]["clip_ft"]).float(),
+                to_tensor(objects[j]["clip_ft"]).float(),
                 dim=0,
             )
             # text_sim = F.cosine_similarity(

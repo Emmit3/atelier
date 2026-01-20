@@ -178,9 +178,13 @@ def main(cfg : DictConfig):
         sam_predictor = SAM('mobile_sam.pt') # UltraLytics SAM 
         # sam_predictor = measure_time(get_sam_predictor)(cfg) # Normal SAM
         clip_model, _, clip_preprocess = open_clip.create_model_and_transforms(
-            "ViT-B-32", "laion2b_s34b_b79k"
+            "ViT-H-14", "laion2b_s32b_b79k"
         )
         clip_model = clip_model.to(cfg.device)
+        #adding some memory optimization to running CLIP
+        clip_model = clip_model.half()
+        clip_model.eval()
+        torch.cuda.empty_cache() 
         clip_tokenizer = open_clip.get_tokenizer("ViT-H-14")
 
         # Set the classes for the detection model

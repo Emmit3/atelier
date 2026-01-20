@@ -56,6 +56,10 @@ def compute_visual_similarities(detection_list: DetectionList, objects: MapObjec
     det_fts = detection_list.get_stacked_values_torch('clip_ft') # (M, D)
     obj_fts = objects.get_stacked_values_torch('clip_ft') # (N, D)
 
+    # Convert to FP32 for cosine_similarity (FP16 not fully supported on CPU)
+    det_fts = det_fts.float()  # ADD THIS LINE
+    obj_fts = obj_fts.float()  # ADD THIS LINE
+
     det_fts = det_fts.unsqueeze(-1) # (M, D, 1)
     obj_fts = obj_fts.T.unsqueeze(0) # (1, D, N)
     

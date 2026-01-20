@@ -102,6 +102,40 @@ system_prompt = system_prompt_only_top
 # gpt_model = "gpt-4-vision-preview"
 gpt_model = "gpt-4o-2024-05-13"
 
+try:
+    from conceptgraph.utils.local_vlm import get_local_vlm, get_local_consolidator
+    LOCAL_VLM_AVAILABLE = True
+except ImportError:
+    LOCAL_VLM_AVAILABLE = False
+    
+# creating local vlm and consolidator 
+
+# Add new functions that use local models
+def get_obj_captions_from_image_local(image_path: str, label_list: list):
+    """Local replacement for get_obj_captions_from_image_gpt4v"""
+    if not LOCAL_VLM_AVAILABLE:
+        raise ImportError("Local VLM not available")
+    
+    vlm = get_local_vlm()
+    return vlm.get_obj_captions_from_image(image_path, label_list)
+
+def get_obj_rel_from_image_local(image_path: str, label_list: list):
+    """Local replacement for get_obj_rel_from_image_gpt4v"""
+    if not LOCAL_VLM_AVAILABLE:
+        raise ImportError("Local VLM not available")
+    
+    vlm = get_local_vlm()
+    return vlm.get_obj_rel_from_image(image_path, label_list)
+
+def consolidate_captions_local(captions: list):
+    """Local replacement for consolidate_captions"""
+    if not LOCAL_VLM_AVAILABLE:
+        raise ImportError("Local consolidator not available")
+    
+    consolidator = get_local_consolidator()
+    return consolidator.consolidate_captions(captions)
+
+# normal python implementations
 def get_openai_client():
     client = OpenAI(
         api_key=os.getenv('OPENAI_API_KEY')

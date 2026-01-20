@@ -39,7 +39,14 @@ from conceptgraph.utils.optional_rerun_wrapper import (
 from conceptgraph.utils.optional_wandb_wrapper import OptionalWandB
 from conceptgraph.utils.geometry import rotation_matrix_to_quaternion
 from conceptgraph.utils.logging_metrics import DenoisingTracker, MappingTracker
-from conceptgraph.utils.vlm import consolidate_captions, get_obj_rel_from_image_gpt4v, get_openai_client
+from conceptgraph.utils.vlm import (
+    consolidate_captions_local,  # new imports from VLM
+    get_obj_rel_from_image_local,  
+    get_obj_captions_from_image_local,  
+    # Keep old imports for fallback
+    consolidate_captions, 
+    get_openai_client
+)
 from conceptgraph.utils.ious import mask_subtract_contained
 from conceptgraph.utils.general_utils import (
     ObjectClasses, 
@@ -105,6 +112,8 @@ torch.set_grad_enabled(False)
 @hydra.main(version_base=None, config_path="../hydra_configs/", config_name="rerun_realtime_mapping")
 # @profile
 def main(cfg : DictConfig):
+    use_local = True # setting our file to use local models
+    
     tracker = MappingTracker()
     
     orr = OptionalReRun()
@@ -192,7 +201,18 @@ def main(cfg : DictConfig):
     else:
         print("\n".join(["NOT Running detections..."] * 10))
 
-    # openai_client = get_openai_client()
+    if use_local: 
+        try:
+            local_vlm = get_local_vlm()
+            local_consolidator = get_local_consolidator()
+            print("Using local models for VLM and consolidation")
+        except Exception as e:
+            print(f"Failed to load local models: {e}")
+            print("Falling back to OpenAI (if API key available)")
+            use_local = False
+            openai_client = get_openai_client() if os.getenv('OPENAI_API_KEY') else None
+    else:
+        openai_client = get_openai_client() if os.getenv('OPENAI_API_KEY') else None
 
     save_hydra_config(cfg, exp_out_path)
     save_hydra_config(detections_exp_cfg, exp_out_path, is_detection_config=True)
@@ -272,8 +292,17 @@ def main(cfg : DictConfig):
                 mask=masks_np,
             )
             
-            # Make the edges
-            labels, edges, edge_image, captions = make_vlm_edges_and_captions(image, curr_det, obj_classes, detection_class_labels, det_exp_vis_path, color_path, False, None) # cfg.make_edges, openai_client)
+            # Update make_vlm_edges_and_captions call (around line 276):
+            if use_local and local_vlm:
+                labels, edges, edge_image, captions = make_vlm_edges_and_captions_local(
+                    image, curr_det, obj_classes, detection_class_labels, 
+                    det_exp_vis_path, color_path, cfg.make_edges, local_vlm
+                )
+            else:
+                labels, edges, edge_image, captions = make_vlm_edges_and_captions(
+                    image, curr_det, obj_classes, detection_class_labels, 
+                    det_exp_vis_path, color_path, cfg.make_edges, openai_client
+                )
 
             image_crops, image_feats, text_feats = compute_clip_features_batched(
                 image_rgb, curr_det, clip_model, clip_preprocess, clip_tokenizer, obj_classes.get_classes_arr(), cfg.device)
@@ -588,10 +617,13 @@ def main(cfg : DictConfig):
                 })
     # LOOP OVER -----------------------------------------------------
     
-    # Consolidate captions 
+    # Consolidate captions with local model condition 
     for object in objects:
         obj_captions = object['captions'][:20]
-        consolidated_caption = consolidate_captions(openai_client, obj_captions)
+        if use_local and local_consolidator:
+            consolidated_caption = consolidate_captions_local(obj_captions)
+        else:
+            consolidated_caption = consolidate_captions(openai_client, obj_captions)
         object['consolidated_caption'] = consolidated_caption
 
     handle_rerun_saving(cfg.use_rerun, cfg.save_rerun, cfg.exp_suffix, exp_out_path)

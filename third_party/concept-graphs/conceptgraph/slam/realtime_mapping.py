@@ -157,7 +157,7 @@ def main(cfg : DictConfig):
         clip_model = clip_model.to(cfg.device)
         clip_tokenizer = open_clip.get_tokenizer("ViT-H-14")
 
-        # Set the classes for the detection model
+        # Set the classes for the detection model2
         detection_model.set_classes(obj_classes.get_classes_arr())
 
     save_hydra_config(cfg, exp_out_path)

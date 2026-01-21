@@ -41,10 +41,12 @@ from conceptgraph.utils.geometry import rotation_matrix_to_quaternion
 from conceptgraph.utils.logging_metrics import DenoisingTracker, MappingTracker
 from conceptgraph.utils.vlm import (
     consolidate_captions_local,  # new imports from VLM
-    get_obj_rel_from_image_local,  
-    get_obj_captions_from_image_local,  
+    get_obj_rel_from_image_local,
+    get_obj_captions_from_image_local,
+    get_local_vlm,
+    get_local_consolidator,
     # Keep old imports for fallback
-    consolidate_captions, 
+    consolidate_captions,
     get_openai_client
 )
 from conceptgraph.utils.ious import mask_subtract_contained

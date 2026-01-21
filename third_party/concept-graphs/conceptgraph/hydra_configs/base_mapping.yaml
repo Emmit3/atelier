@@ -11,7 +11,7 @@ stride: 50
 image_height: null # if null, it will be determined by dataconfig
 image_width: null # if null, it will be determined by dataconfig
 
-make_edges: !!bool False
+make_edges: !!bool True
 
 periodically_save_pcd: !!bool False
 periodically_save_pcd_interval: 10

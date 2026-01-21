@@ -109,7 +109,6 @@ except ImportError:
     LOCAL_VLM_AVAILABLE = False
     
 # creating local vlm and consolidator 
-
 # Add new functions that use local models
 def get_obj_captions_from_image_local(image_path: str, label_list: list):
     """Local replacement for get_obj_captions_from_image_gpt4v"""

@@ -1,3 +1,7 @@
+# Load environment variables from .env file before anything else
+from dotenv import load_dotenv
+load_dotenv()
+
 # Standard library imports
 import cv2
 import os

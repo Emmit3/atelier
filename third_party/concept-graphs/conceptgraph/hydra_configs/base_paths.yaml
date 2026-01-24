@@ -1,3 +1,5 @@
-# Main paths
-repo_root: D:\My Projects\AtelierLabs\atelier\third_party\concept-graphs
-data_root: D:\My Projects\AtelierLabs\atelier\data 
+# Main paths - loaded from environment variables (.env file)
+# Fallback values are provided if env vars are not set
+repo_root: ${oc.env:REPO_ROOT}
+data_root: ${oc.env:DATA_ROOT}
+# create the .env with using the directory for the conceptgraphs repo_root and the data_root for the repilica directory 

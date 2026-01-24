@@ -10,6 +10,10 @@ from pathlib import Path
 import pickle
 import gzip
 
+# Load environment variables from .env file before anything else
+from dotenv import load_dotenv
+load_dotenv()
+
 # Third-party imports
 import cv2
 import numpy as np

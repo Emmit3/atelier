@@ -2,6 +2,10 @@
 The script is used to model Grounded SAM detections in 3D, it assumes the tag2text classes are avaialable. It also assumes the dataset has Clip features saved for each object/mask.
 '''
 
+# Load environment variables from .env file before anything else
+from dotenv import load_dotenv
+load_dotenv()
+
 # Standard library imports
 from typing import Mapping
 import uuid
